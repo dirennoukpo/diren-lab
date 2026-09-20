@@ -1,0 +1,18 @@
+---
+import { t, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const s = t(lang);
+const year = new Date().getFullYear();
+---
+
+<footer class="border-t border-border dark:border-border-dark mt-16">
+  <div class="max-w-5xl mx-auto px-4 py-8 text-sm text-ink-muted dark:text-ink-muted-dark flex flex-wrap justify-between gap-4">
+    <p>{s.site_tagline}</p>
+    {/* TODO: replace with the real GitHub profile URL */}
+    <p>© {year} — <a class="underline hover:text-ink dark:hover:text-ink-dark" href="#" rel="noopener">GitHub</a></p>
+  </div>
+</footer>

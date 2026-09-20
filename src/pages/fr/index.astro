@@ -1,0 +1,69 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ProjectCard from '../../components/ProjectCard.astro';
+import ExperimentCard from '../../components/ExperimentCard.astro';
+import JournalEntry from '../../components/JournalEntry.astro';
+import { t } from '../../i18n/ui';
+
+const lang = 'fr' as const;
+const s = t(lang);
+
+const projects = (await getCollection('projects', (e) => e.data.lang === lang && !e.data.draft))
+  .sort((a, b) => b.data.startDate.getTime() - a.data.startDate.getTime());
+
+const experiments = (await getCollection('experiments', (e) => e.data.lang === lang && !e.data.draft))
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+
+const journal = (await getCollection('journal', (e) => e.data.lang === lang && !e.data.draft))
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+
+const latestProject = projects[0];
+const latestExperiment = experiments[0];
+const latestJournal = journal[0];
+---
+
+<BaseLayout lang={lang} title="Accueil" description={s.site_tagline}>
+  <section>
+    <h1 class="text-3xl font-semibold tracking-tight">Diren Lab</h1>
+    <p class="mt-2 text-lg text-ink-muted dark:text-ink-muted-dark max-w-2xl">{s.site_tagline}</p>
+    <p class="mt-4 max-w-2xl text-sm text-ink-muted dark:text-ink-muted-dark">
+      {/* TODO: replace with a real one-paragraph introduction of the author and the lab's purpose. */}
+      Apprendre → Comprendre → Concevoir → Implémenter → Tester → Échouer → Analyser → Corriger →
+      Construire → Documenter → Publier → Progresser.
+    </p>
+  </section>
+
+  <section class="mt-12">
+    <h2 class="text-sm font-mono uppercase tracking-wide text-ink-muted dark:text-ink-muted-dark mb-3">
+      Dernier projet
+    </h2>
+    {latestProject ? (
+      <ProjectCard lang={lang} project={latestProject} />
+    ) : (
+      <p class="text-ink-muted dark:text-ink-muted-dark text-sm">{s.empty_state}</p>
+    )}
+  </section>
+
+  <section class="mt-10">
+    <h2 class="text-sm font-mono uppercase tracking-wide text-ink-muted dark:text-ink-muted-dark mb-3">
+      Dernière expérience
+    </h2>
+    {latestExperiment ? (
+      <ExperimentCard lang={lang} experiment={latestExperiment} />
+    ) : (
+      <p class="text-ink-muted dark:text-ink-muted-dark text-sm">{s.empty_state}</p>
+    )}
+  </section>
+
+  <section class="mt-10">
+    <h2 class="text-sm font-mono uppercase tracking-wide text-ink-muted dark:text-ink-muted-dark mb-3">
+      Progression en cours
+    </h2>
+    {latestJournal ? (
+      <JournalEntry lang={lang} entry={latestJournal} />
+    ) : (
+      <p class="text-ink-muted dark:text-ink-muted-dark text-sm">{s.empty_state}</p>
+    )}
+  </section>
+</BaseLayout>

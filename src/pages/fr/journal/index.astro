@@ -1,0 +1,24 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import JournalEntry from '../../../components/JournalEntry.astro';
+import { t } from '../../../i18n/ui';
+
+const lang = 'fr' as const;
+const s = t(lang);
+
+const entries = (await getCollection('journal', (e) => e.data.lang === lang && !e.data.draft))
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+---
+
+<BaseLayout lang={lang} title={s.nav_journal} description="Timeline de progression : niveau de départ, objectifs, compétences acquises, difficultés.">
+  <h1 class="text-2xl font-semibold">{s.nav_journal}</h1>
+
+  <div class="mt-8">
+    {entries.length > 0 ? (
+      entries.map((entry) => <JournalEntry lang={lang} entry={entry} />)
+    ) : (
+      <p class="text-ink-muted dark:text-ink-muted-dark text-sm">{s.empty_state}</p>
+    )}
+  </div>
+</BaseLayout>

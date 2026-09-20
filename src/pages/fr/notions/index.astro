@@ -1,0 +1,44 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import NotionCard from '../../../components/NotionCard.astro';
+import Tag from '../../../components/Tag.astro';
+import { t } from '../../../i18n/ui';
+
+const lang = 'fr' as const;
+const s = t(lang);
+
+const notions = (await getCollection('notions', (e) => e.data.lang === lang && !e.data.draft))
+  .sort((a, b) => a.data.title.localeCompare(b.data.title));
+
+const domains = [...new Set(notions.map((n) => n.data.domain))].sort();
+---
+
+<BaseLayout lang={lang} title={s.nav_notions} description="Fondamentaux théoriques : maths, physique, mécanique, cinématique, automatique.">
+  <h1 class="text-2xl font-semibold">{s.nav_notions}</h1>
+
+  {domains.length > 0 && (
+    <div class="mt-4 flex flex-wrap gap-2" data-filter-group role="group" aria-label="Filtrer par domaine">
+      <button type="button" class="filter-btn" data-domain="all" aria-pressed="true"><Tag variant="accent">Tous</Tag></button>
+      {domains.map((d) => (
+        <button type="button" class="filter-btn" data-domain={d} aria-pressed="false"><Tag>{d}</Tag></button>
+      ))}
+    </div>
+  )}
+
+  <div class="mt-6 grid gap-4 sm:grid-cols-2" data-project-list>
+    {notions.length > 0 ? (
+      notions.map((notion) => (
+        <div data-domain={notion.data.domain}>
+          <NotionCard lang={lang} notion={notion} />
+        </div>
+      ))
+    ) : (
+      <p class="text-ink-muted dark:text-ink-muted-dark text-sm">{s.empty_state}</p>
+    )}
+  </div>
+
+  <script>
+    import '../../../scripts/domain-filter.ts';
+  </script>
+</BaseLayout>

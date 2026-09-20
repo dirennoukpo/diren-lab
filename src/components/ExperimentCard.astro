@@ -1,0 +1,37 @@
+---
+import { t, type Lang } from '../i18n/ui';
+import Tag from './Tag.astro';
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  lang: Lang;
+  experiment: CollectionEntry<'experiments'>;
+}
+const { lang, experiment } = Astro.props;
+const s = t(lang);
+const outcomeLabel = {
+  success: s.outcome_success,
+  partial: s.outcome_partial,
+  failure: s.outcome_failure,
+}[experiment.data.outcome];
+const outcomeVariant = experiment.data.outcome === 'failure' ? 'default' : 'accent';
+const dateStr = experiment.data.date.toLocaleDateString(lang === 'fr' ? 'fr-FR' : 'en-US', {
+  year: 'numeric',
+  month: 'short',
+  day: 'numeric',
+});
+---
+
+<a
+  href={`/${lang}/experiments/${experiment.id}/`}
+  class="block border border-border dark:border-border-dark rounded-lg p-5 hover:border-accent dark:hover:border-accent-dark transition-colors"
+>
+  <div class="flex items-center gap-2 mb-2">
+    <Tag variant={outcomeVariant}>{outcomeLabel}</Tag>
+    <time datetime={experiment.data.date.toISOString()} class="text-xs font-mono text-ink-muted dark:text-ink-muted-dark">
+      {dateStr}
+    </time>
+  </div>
+  <h3 class="text-lg font-medium">{experiment.data.title}</h3>
+  <p class="mt-1 text-sm text-ink-muted dark:text-ink-muted-dark">{experiment.data.description}</p>
+</a>

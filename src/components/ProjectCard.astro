@@ -1,0 +1,29 @@
+---
+import { t, type Lang } from '../i18n/ui';
+import Tag from './Tag.astro';
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  lang: Lang;
+  project: CollectionEntry<'projects'>;
+}
+const { lang, project } = Astro.props;
+const s = t(lang);
+const statusLabel = {
+  'in-progress': s.status_in_progress,
+  completed: s.status_completed,
+  paused: s.status_paused,
+}[project.data.status];
+---
+
+<a
+  href={`/${lang}/projects/${project.id}/`}
+  class="block border border-border dark:border-border-dark rounded-lg p-5 hover:border-accent dark:hover:border-accent-dark transition-colors"
+>
+  <div class="flex items-center gap-2 mb-2">
+    <Tag variant="accent">{project.data.domain}</Tag>
+    <Tag>{statusLabel}</Tag>
+  </div>
+  <h3 class="text-lg font-medium">{project.data.title}</h3>
+  <p class="mt-1 text-sm text-ink-muted dark:text-ink-muted-dark">{project.data.description}</p>
+</a>

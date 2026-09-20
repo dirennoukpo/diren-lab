@@ -1,0 +1,24 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import ExperimentCard from '../../../components/ExperimentCard.astro';
+import { t } from '../../../i18n/ui';
+
+const lang = 'fr' as const;
+const s = t(lang);
+
+const experiments = (await getCollection('experiments', (e) => e.data.lang === lang && !e.data.draft))
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+---
+
+<BaseLayout lang={lang} title={s.nav_experiments} description="Journal chronologique des expériences : hypothèses, résultats, échecs, corrections.">
+  <h1 class="text-2xl font-semibold">{s.nav_experiments}</h1>
+
+  <div class="mt-6 space-y-4">
+    {experiments.length > 0 ? (
+      experiments.map((experiment) => <ExperimentCard lang={lang} experiment={experiment} />)
+    ) : (
+      <p class="text-ink-muted dark:text-ink-muted-dark text-sm">{s.empty_state}</p>
+    )}
+  </div>
+</BaseLayout>

@@ -1,0 +1,80 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import RelatedEntities from '../../../components/RelatedEntities.astro';
+import YouTubeEmbed from '../../../components/YouTubeEmbed.astro';
+import GitHubRepoLink from '../../../components/GitHubRepoLink.astro';
+import ExperimentChart from '../../../components/ExperimentChart';
+import Tag from '../../../components/Tag.astro';
+import { t } from '../../../i18n/ui';
+import { getRelated } from '../../../lib/graph';
+
+const lang = 'fr' as const;
+const s = t(lang);
+
+export async function getStaticPaths() {
+  const experiments = await getCollection('experiments', (e) => e.data.lang === 'fr' && !e.data.draft);
+  return experiments.map((experiment) => ({ params: { slug: experiment.id }, props: { experiment } }));
+}
+
+const { experiment } = Astro.props;
+const { Content } = await render(experiment);
+const related = getRelated('experiments', experiment.id);
+
+// Datasets are opt-in JSON files under src/data/experiments/*.json, referenced
+// by the `dataset` frontmatter field (e.g. "torque-vs-angle.json").
+const datasets = import.meta.glob('/src/data/experiments/*.json', { eager: true, import: 'default' }) as Record<string, unknown>;
+const datasetEntry = experiment.data.dataset
+  ? Object.entries(datasets).find(([path]) => path.endsWith(`/${experiment.data.dataset}`))
+  : undefined;
+const chartData = datasetEntry ? (datasetEntry[1] as { xKey: string; yKeys: string[]; caption: string; points: Record<string, number | string>[] }) : undefined;
+
+const outcomeLabel = { success: s.outcome_success, partial: s.outcome_partial, failure: s.outcome_failure }[experiment.data.outcome];
+const dateStr = experiment.data.date.toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' });
+---
+
+<BaseLayout lang={lang} title={experiment.data.title} description={experiment.data.description}>
+  <article>
+    <div class="flex items-center gap-2 mb-3">
+      <Tag variant={experiment.data.outcome === 'failure' ? 'default' : 'accent'}>{outcomeLabel}</Tag>
+      <time datetime={experiment.data.date.toISOString()} class="text-xs font-mono text-ink-muted dark:text-ink-muted-dark">{dateStr}</time>
+    </div>
+    <h1 class="text-3xl font-semibold tracking-tight">{experiment.data.title}</h1>
+    <p class="mt-2 text-lg text-ink-muted dark:text-ink-muted-dark">{experiment.data.description}</p>
+
+    {experiment.data.videos.map((video) => <YouTubeEmbed id={video.id} title={video.title} />)}
+
+    {/*
+      Fixed template enforced by src/content/experiments/_template.mdx:
+      Problématique, Objectif, Contexte, Hypothèse, Théorie utilisée, Méthodologie,
+      Implémentation, Expérience, Résultats, Échec éventuel, Analyse, Correction,
+      Conclusion, Prochaine expérience — authored as MDX headings in the body below.
+    */}
+    <div class="prose dark:prose-invert max-w-none mt-6">
+      <Content />
+    </div>
+
+    {chartData && (
+      <section class="mt-8">
+        <h2 class="text-sm font-mono uppercase tracking-wide text-ink-muted dark:text-ink-muted-dark mb-2">
+          Données expérimentales
+        </h2>
+        <ExperimentChart client:visible data={chartData.points} xKey={chartData.xKey} yKeys={chartData.yKeys} caption={chartData.caption} />
+      </section>
+    )}
+
+    {experiment.data.github.length > 0 && (
+      <section class="mt-8">
+        <h2 class="text-sm font-mono uppercase tracking-wide text-ink-muted dark:text-ink-muted-dark mb-2">Dépôts GitHub</h2>
+        <ul class="grid gap-3 sm:grid-cols-2">
+          {experiment.data.github.map((repo) => (
+            <GitHubRepoLink lang={lang} url={repo.url} description={repo.description} reproducible={repo.reproducible} />
+          ))}
+        </ul>
+      </section>
+    )}
+
+    <RelatedEntities lang={lang} label={s.related_projects} items={related.filter((r) => r.type === 'projects')} />
+    <RelatedEntities lang={lang} label={s.related_notions} items={related.filter((r) => r.type === 'notions')} />
+  </article>
+</BaseLayout>

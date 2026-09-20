@@ -1,0 +1,38 @@
+---
+import type { Lang } from '../i18n/ui';
+import type { EntityRef } from '../lib/graph';
+
+interface Props {
+  lang: Lang;
+  label: string;
+  items: EntityRef[];
+}
+const { lang, label, items } = Astro.props;
+
+const collectionPath: Record<string, string> = {
+  projects: 'projects',
+  notions: 'notions',
+  experiments: 'experiments',
+  journal: 'journal',
+};
+---
+
+{items.length > 0 && (
+  <section class="mt-8">
+    <h2 class="text-sm font-mono uppercase tracking-wide text-ink-muted dark:text-ink-muted-dark mb-2">
+      {label}
+    </h2>
+    <ul class="flex flex-wrap gap-2">
+      {items.map((item) => (
+        <li>
+          <a
+            href={`/${lang}/${collectionPath[item.type]}/${item.slug}/`}
+            class="inline-block rounded border border-border dark:border-border-dark px-3 py-1.5 text-sm hover:border-accent dark:hover:border-accent-dark hover:text-accent dark:hover:text-accent-dark"
+          >
+            {item.title}
+          </a>
+        </li>
+      ))}
+    </ul>
+  </section>
+)}

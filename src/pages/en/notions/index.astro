@@ -1,0 +1,25 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import NotionCard from '../../../components/NotionCard.astro';
+import EnNotice from '../../../components/EnNotice.astro';
+import { t } from '../../../i18n/ui';
+
+const lang = 'en' as const;
+const s = t(lang);
+
+const notions = (await getCollection('notions', (e) => e.data.lang === lang && !e.data.draft))
+  .sort((a, b) => a.data.title.localeCompare(b.data.title));
+---
+
+<BaseLayout lang={lang} title={s.nav_notions} description="Theoretical fundamentals: maths, physics, mechanics, kinematics, control theory.">
+  <EnNotice lang={lang} />
+  <h1 class="text-2xl font-semibold">{s.nav_notions}</h1>
+  <div class="mt-6 grid gap-4 sm:grid-cols-2">
+    {notions.length > 0 ? (
+      notions.map((notion) => <NotionCard lang={lang} notion={notion} />)
+    ) : (
+      <p class="text-ink-muted dark:text-ink-muted-dark text-sm">{s.empty_state}</p>
+    )}
+  </div>
+</BaseLayout>

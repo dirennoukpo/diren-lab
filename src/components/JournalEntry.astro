@@ -1,0 +1,35 @@
+---
+import type { Lang } from '../i18n/ui';
+import type { CollectionEntry } from 'astro:content';
+import { render } from 'astro:content';
+
+interface Props {
+  lang: Lang;
+  entry: CollectionEntry<'journal'>;
+}
+const { lang, entry } = Astro.props;
+const { Content } = await render(entry);
+const dateStr = entry.data.date.toLocaleDateString(lang === 'fr' ? 'fr-FR' : 'en-US', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+});
+---
+
+<article class="border-l-2 border-border dark:border-border-dark pl-6 pb-10 relative">
+  <div class="absolute -left-[5px] top-1 w-2 h-2 rounded-full bg-accent dark:bg-accent-dark"></div>
+  <time datetime={entry.data.date.toISOString()} class="text-xs font-mono text-ink-muted dark:text-ink-muted-dark">
+    {dateStr}
+  </time>
+  <h3 class="text-lg font-medium mt-1">{entry.data.title}</h3>
+
+  {entry.data.objectives.length > 0 && (
+    <ul class="mt-2 text-sm list-disc list-inside text-ink-muted dark:text-ink-muted-dark">
+      {entry.data.objectives.map((o) => <li>{o}</li>)}
+    </ul>
+  )}
+
+  <div class="prose prose-sm dark:prose-invert max-w-none mt-3">
+    <Content />
+  </div>
+</article>

@@ -1,0 +1,25 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import ProjectCard from '../../../components/ProjectCard.astro';
+import EnNotice from '../../../components/EnNotice.astro';
+import { t } from '../../../i18n/ui';
+
+const lang = 'en' as const;
+const s = t(lang);
+
+const projects = (await getCollection('projects', (e) => e.data.lang === lang && !e.data.draft))
+  .sort((a, b) => b.data.startDate.getTime() - a.data.startDate.getTime());
+---
+
+<BaseLayout lang={lang} title={s.nav_projects} description="Robotics and AI projects, from prototype to deployed system.">
+  <EnNotice lang={lang} />
+  <h1 class="text-2xl font-semibold">{s.nav_projects}</h1>
+  <div class="mt-6 grid gap-4 sm:grid-cols-2">
+    {projects.length > 0 ? (
+      projects.map((project) => <ProjectCard lang={lang} project={project} />)
+    ) : (
+      <p class="text-ink-muted dark:text-ink-muted-dark text-sm">{s.empty_state}</p>
+    )}
+  </div>
+</BaseLayout>

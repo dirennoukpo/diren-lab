@@ -1,0 +1,20 @@
+---
+import type { Lang } from '../i18n/ui';
+import Tag from './Tag.astro';
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  lang: Lang;
+  notion: CollectionEntry<'notions'>;
+}
+const { lang, notion } = Astro.props;
+---
+
+<a
+  href={`/${lang}/notions/${notion.id}/`}
+  class="block border border-border dark:border-border-dark rounded-lg p-5 hover:border-accent dark:hover:border-accent-dark transition-colors"
+>
+  <Tag variant="accent">{notion.data.domain}</Tag>
+  <h3 class="mt-2 text-lg font-medium">{notion.data.title}</h3>
+  <p class="mt-1 text-sm text-ink-muted dark:text-ink-muted-dark">{notion.data.description}</p>
+</a>

@@ -1,0 +1,12 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const lang = 'en' as const;
+---
+
+<BaseLayout lang={lang} title="Page not found" description="Page not found.">
+  <h1 class="text-2xl font-semibold">404 — Page not found</h1>
+  <p class="mt-2 text-ink-muted dark:text-ink-muted-dark">
+    <a href="/en/" class="underline hover:text-accent dark:hover:text-accent-dark">Back to home</a>
+  </p>
+</BaseLayout>
